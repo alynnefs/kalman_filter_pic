@@ -70,7 +70,7 @@
 #include <stdio.h>
 #include <stdlib.h>   
 #include <string.h>
-//#include "in.h"
+#include "in.h"
 
 
 double Q = 0.0; // erro estimado no processo
@@ -79,72 +79,79 @@ double P = 1.0, X = 0.0, K;
 // P: estimativa de covariância inicial, X: estimativa inicial do estado, K: variavel auxiliar
 double result;
 
+float const *ptr = &DATA[0];
+
 // atualizacao de medidas com base no filtro de kalman
-void measurementUpdate(){
-     K = (P + Q) / (P + Q + R);
-     P = R * (P + Q) / (R + P + Q);
+
+void measurementUpdate() {
+    K = (P + Q) / (P + Q + R);
+    P = R * (P + Q) / (R + P + Q);
 }
 
 // soma com k anterior
-double update(double measurement){
-    double result;
-     double result = X + (measurement - X) * K;
+
+double update(double measurement) {
+    //double result;
+    result = X + (measurement - X) * K;
     measurementUpdate(); //atualizacao de medidas
-     X = result;
-     return result;
+    X = result;
+    return result;
 }
 
-void UART_Init(const long int baudrate)
-{
+void UART_Init(const long int baudrate) {
     unsigned int x;
-    x =  (_XTAL_FREQ/baudrate/64) - 1;            //SPBRG for Low Baud Rate
-    SPBRG = x;                                    //Writing SPBRG Register
-    SYNC = 0;                                     //Setting Asynchronous Mode, ie UART
-    SPEN = 1;                                     //Enables Serial Port
-    TRISC7 = 1;                                   //As Prescribed in Datasheet
-    TRISC6 = 1;                                   //As Prescribed in Datasheet
-    CREN = 1;                                     //Enables Continuous Reception
-    TXEN = 1;                                     //Enables Transmission
+    x = (_XTAL_FREQ / baudrate / 64) - 1; //SPBRG for Low Baud Rate
+    SPBRG = x; //Writing SPBRG Register
+    SYNC = 0; //Setting Asynchronous Mode, ie UART
+    SPEN = 1; //Enables Serial Port
+    TRISC7 = 1; //As Prescribed in Datasheet
+    TRISC6 = 1; //As Prescribed in Datasheet
+    CREN = 1; //Enables Continuous Reception
+    TXEN = 1; //Enables Transmission
 }
 
 void putch(unsigned char data) {
-    while( ! PIR1bits.TXIF);          // wait until the transmitter is ready
-    TXREG = data;                     // send one character
+    while (!PIR1bits.TXIF); // wait until the transmitter is ready
+    TXREG = data; // send one character
 }
 
 void main(void) {
-  UART_Init(9600);
-  //// CLOCK DE 8MHz, CLOCK INTERNO
-  OSCCONbits.IRCF = 7; // oscilador interno a 8MHz
-  //OSCCONbits.SCS = 2; // oscilador interno
-  // CLOCK DE 48MHz, CRISTAL EXTERNO, COM PLL
-  OSCCONbits.SCS = 2; // oscilador interno
-   
-  TMR0L = 99;
- 
-  T0CONbits.T08BIT = 1;
-  T0CONbits.T0CS = 0;
-  T0CONbits.PSA = 0;
-  T0CONbits.T0PS = 6;
-  T0CONbits.TMR0ON = 1; 
+    UART_Init(9600);
+    //// CLOCK DE 8MHz, CLOCK INTERNO
+    OSCCONbits.IRCF = 7; // oscilador interno a 8MHz
+    //OSCCONbits.SCS = 2; // oscilador interno
+    // CLOCK DE 48MHz, CRISTAL EXTERNO, COM PLL
+    OSCCONbits.SCS = 2; // oscilador interno
 
-  float DATA[] = {6.26, 9.68, 7.73, 2.33, 6.05, 4.41, 8.15, 1.8, 2.49, 7.0, 1.83, 7.47, 8.93};
-  //float result;
-  int i = 0;
-  while(1)
-  {
-   if(INTCONbits.TMR0IF){
-     INTCONbits.TMR0IF = 0;
-     //data = 0;
-     result = update(DATA[i]);
-  
-     printf("%3.2f\t%3.2f\n\r", DATA[i], result);
-     i++;
-     if(i == sizeof(DATA)/sizeof(DATA[0])){
-         break;
-     }
-   }
+    TMR0L = 99;
 
-  }
+    T0CONbits.T08BIT = 1;
+    T0CONbits.T0CS = 0;
+    T0CONbits.PSA = 0;
+    T0CONbits.T0PS = 6;
+    T0CONbits.TMR0ON = 1;
+    
+    TRISB = 0;
+    LATB = 0xFF;
 
+    //float DATA[] = {6.26, 9.68, 7.73, 2.33, 6.05, 4.41, 8.15, 1.8, 2.49, 7.0, 1.83, 7.47, 8.93};
+    //float result;
+    
+    unsigned int i = 0;
+
+    while(1){
+        LATBbits.LATB3 = 1;
+        while (!INTCONbits.TMR0IF);
+            INTCONbits.TMR0IF = 0;
+            if(i<NUM_AMS){
+                result = update(DATA[i]);
+                printf("%d\t%.2f\t%.2f\n\r", i, DATA[i], result);
+                i++;
+                LATBbits.LATB4 = !LATBbits.LATB4;
+            }
+//            LATBbits.LATB4 = 0;
+        if(i == NUM_AMS){
+            LATBbits.LATB4 = 0;
+        }
+    }
 }
