@@ -78,8 +78,7 @@ double R = 0.2; // erro estimado nas medidas
 double P = 1.0, X = 0.0, K;
 // P: estimativa de covariância inicial, X: estimativa inicial do estado, K: variavel auxiliar
 double result;
-
-float const *ptr = &DATA[0];
+double result2;
 
 // atualizacao de medidas com base no filtro de kalman
 
@@ -134,24 +133,42 @@ void main(void) {
     TRISB = 0;
     LATB = 0xFF;
 
-    //float DATA[] = {6.26, 9.68, 7.73, 2.33, 6.05, 4.41, 8.15, 1.8, 2.49, 7.0, 1.83, 7.47, 8.93};
-    //float result;
-    
     unsigned int i = 0;
+    unsigned int aux = 0;
 
-    while(1){
+        while(1){
+        
         LATBbits.LATB3 = 1;
         while (!INTCONbits.TMR0IF);
-            INTCONbits.TMR0IF = 0;
-            if(i<NUM_AMS){
-                result = update(DATA[i]);
-                printf("%d\t%.2f\t%.2f\n\r", i, DATA[i], result);
-                i++;
-                LATBbits.LATB4 = !LATBbits.LATB4;
+        INTCONbits.TMR0IF = 0;
+        if(i<NUM_AMS && aux == 0){
+            result = update(DATA1[i]);
+            printf("%d\t%.2f\t%.2f\n\r", i, DATA1[i], result);
+            i++;
+            LATBbits.LATB4 = !LATBbits.LATB4;
+               if(i == NUM_AMS){
+                Q = 0.0;
+                R = 0.2;
+                P = 1.0;
+                X = 0.0;
+                K = 0.0;
+                i = 0;
+                aux = 1;
+                LATBbits.LATB4 = 0;
             }
+        }
+        
 //            LATBbits.LATB4 = 0;
-        if(i == NUM_AMS){
-            LATBbits.LATB4 = 0;
+
+        
+        if(i<NUM_AMS && aux == 1){
+            result2 = update(DATA2[i]);
+            printf("%d\t%.2f\t%.2f\n\r", i, DATA2[i], result2);
+            i++;
+            LATBbits.LATB4 = !LATBbits.LATB4;
+            if(i == NUM_AMS){
+                aux = 2; //para
+            }
         }
     }
 }
