@@ -76,7 +76,7 @@
 double Q = 0.0; // erro estimado no processo
 double R = 0.2; // erro estimado nas medidas
 double P = 1.0, X = 0.0, K;
-// P: estimativa de covari√¢ncia inicial, X: estimativa inicial do estado, K: variavel auxiliar
+// P: estimativa de covari‚ncia inicial, X: estimativa inicial do estado, K: variavel auxiliar
 double result;
 double result2;
 
@@ -141,6 +141,7 @@ void main(void) {
         LATBbits.LATB3 = 1;
         while (!INTCONbits.TMR0IF);
         INTCONbits.TMR0IF = 0;
+       // printf('v'); //inicio voltage
         if(i<NUM_AMS && aux == 0){
             result = update(DATA1[i]);
             printf("%d\t%.2f\t%.2f\n\r", i, DATA1[i], result);
@@ -160,7 +161,7 @@ void main(void) {
         
 //            LATBbits.LATB4 = 0;
 
-        
+       // printf('c'); //inicio cannon
         if(i<NUM_AMS && aux == 1){
             result2 = update(DATA2[i]);
             printf("%d\t%.2f\t%.2f\n\r", i, DATA2[i], result2);
