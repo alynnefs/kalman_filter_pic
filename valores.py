@@ -12,9 +12,7 @@
 # OBS: ALGORITMO MODIFICADO POR ALYNNE FERREIRA E MATEUS RODRIGUES                            #
 # quantidade de números, nome do arquivo com os valores verdadeiros, nome do arquivo com erro #
 #                                                                                             #
-# argv[1] - quantidade de valores                                                             #
-# argv[2] - arquivo com valor real -> 800                                                     #
-# in - arquivo de entrada (com erros)                                                         #
+# saída: voltagereal.txt, cannonreal.txt, in.h - arquivo de entrada (com erros)               #
 # --------------------------------------------------------------------------------------------#
 
 import random
@@ -34,7 +32,6 @@ def voltage():
     def GetVoltageWithNoise(self):
       return random.gauss(self.GetVoltage(),self.noiselevel)
 
-  #numsteps = int(sys.argv[1])
   numsteps = 800
 
   A    = numpy.matrix([1])# matriz de transicao de estado
@@ -195,7 +192,7 @@ def cannonball():
   for i in range (iterations-1):
     arqin.write(str(round(ny[i],2)))
     arqin.write(',')
-  arqin.write(str(round(ny[i],2)))
+  arqin.write(str(round(ny[i],2))) # último sem vírgula
   
 ##############################################################################################################
   
@@ -204,12 +201,10 @@ def main():
   arqin.write('#ifndef _IN_H_\n')
   arqin.write('#define _IN_H_\n')
   arqin.write('#define NUM_AMS 800\n')
-  #arqin.write("float const DATA[0][] = {")
-  arqin.write("float const DATA1 = {")
+  arqin.write("float const DATA1[] = {")
   voltage()
   arqin.write("};\n")
-  #arqin.write("float const DATA[1][] = {")
-  arqin.write("float const DATA2 = {")
+  arqin.write("float const DATA2[] = {")
   cannonball()  
   arqin.write("};\n")
   arqin.write('#endif');

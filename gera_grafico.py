@@ -1,3 +1,12 @@
+# -------------------------------------------------------#
+# gera_grafico.py
+# written by Alynne Ferreira (alynneferreiras@gmail.com) #
+#                                                        #
+# argv[1] - arquivo com valores reais                    #
+# argv[2] - arquivo com valores de entrada               #
+# argv[3] - arquivo com valores filtrados                #
+# -------------------------------------------------------#
+
 import sys
 import matplotlib.pyplot as plt
 
@@ -22,7 +31,6 @@ for line in arq_real:
 
 x = [c for c in range(len(entrada))]
 
-#print y1
 print len(entrada)
 print len(saida)
 
